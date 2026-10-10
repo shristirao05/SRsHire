@@ -4,3 +4,4 @@ ocrmypdf
 pdfminer.six
 reportlab
 pillow
+python-dotenv
