@@ -1,0 +1,6 @@
+flask
+groq
+ocrmypdf
+pdfminer.six
+reportlab
+pillow

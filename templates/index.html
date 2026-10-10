@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SRsHire — AI Resume Screening System</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+
+  <main class="page">
+
+    <!-- HERO -->
+    <div class="hero">
+      <span class="eyebrow">AI-powered screening</span>
+      <h1 class="wordmark">SRs<span class="accent">Hire</span></h1>
+      <p class="hero-desc">Screen hundreds of resumes in minutes. Drop in a folder, describe the role, and let the AI do the rest.</p>
+    </div>
+
+    <!-- FORM CARD -->
+    <section class="card" id="form-card">
+      <h2>Screen resumes with AI</h2>
+      <p class="hint">Fill in the details below and let SRsHire do the screening for you.</p>
+
+      <div class="file-count-badge" id="file-count-badge" style="display:none">
+        <span class="badge-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </span>
+        <span id="file-count-text">0 PDF files found</span>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="input_folder">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          Resume folder path <span class="req">*</span>
+        </label>
+        <div class="path-row">
+          <input type="text" id="input_folder" placeholder="e.g. D:\Resumes">
+          <button type="button" class="browse-btn" onclick="browseFolder('input_folder')">Browse…</button>
+        </div>
+        <span class="field-hint">Folder containing all candidate resume PDFs</span>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="job_role">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+          Job role <span class="req">*</span>
+        </label>
+        <input type="text" id="job_role" placeholder="Data Analyst, Software Engineer, HR Manager…">
+        <span class="field-hint">SRsHire auto-corrects minor typos.</span>
+        <div class="role-feedback" id="role-feedback" style="display:none"></div>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="compulsory_skills">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 16.8l-6.2 4.5 2.4-7.4L2 9.4h7.6z"/></svg>
+          Compulsory skills <span class="optional">(optional)</span>
+        </label>
+        <input type="text" id="compulsory_skills" placeholder="Python, SQL, Machine Learning…">
+        <span class="field-hint">Leave blank if no specific skills are required.</span>
+      </div>
+
+      <div class="field">
+        <label class="field-label accent-icon" for="output_folder">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Output folder path <span class="req">*</span>
+        </label>
+        <div class="path-row">
+          <input type="text" id="output_folder" placeholder="e.g. D:\Shortlisted">
+          <button type="button" class="browse-btn" onclick="browseFolder('output_folder')">Browse…</button>
+        </div>
+        <span class="field-hint">Shortlisted resumes will be saved here.</span>
+      </div>
+
+      <p class="error-msg" id="error-msg"></p>
+
+      <button id="submit-btn" onclick="startScreening()">
+        <span class="btn-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </span>
+        Start screening
+      </button>
+    </section>
+
+    <!-- POPUP -->
+    <div class="popup-overlay" id="popup-overlay" style="display:none">
+      <div class="popup">
+        <div class="popup-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <h3 id="popup-title">Job role not recognised</h3>
+        <p id="popup-message">Your job role could not be understood. Please rewrite it clearly.</p>
+        <input type="text" id="popup-input" placeholder="Enter job role again...">
+        <div class="popup-actions">
+          <button class="popup-btn primary" onclick="retryRole()">Try again</button>
+          <button class="popup-btn secondary" onclick="closePopup()">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROGRESS CARD -->
+    <section class="card" id="progress-card" style="display:none">
+      <h2>Screening in progress…</h2>
+      <div class="role-pill" id="role-pill"></div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+      <div class="progress-label" id="progress-label">Starting…</div>
+      <div class="console" id="console"></div>
+    </section>
+
+    <!-- DONE CARD -->
+    <section class="card" id="done-card" style="display:none">
+      <div class="done-header">
+        <span class="done-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </span>
+        <h2>Screening complete</h2>
+      </div>
+      <p id="done-summary" class="done-summary"></p>
+
+      <div id="shortlisted-section" style="display:none">
+        <h3 class="results-heading">Shortlisted candidates</h3>
+        <table class="results-table">
+          <thead>
+            <tr><th>#</th><th>Candidate name</th><th>Match %</th><th>Saved as</th></tr>
+          </thead>
+          <tbody id="shortlisted-body"></tbody>
+        </table>
+      </div>
+
+      <div id="rejected-section" style="display:none">
+        <h3 class="results-heading rejected-heading">Not shortlisted</h3>
+        <table class="results-table">
+          <thead>
+            <tr><th>#</th><th>Candidate name</th><th>Reason</th></tr>
+          </thead>
+          <tbody id="rejected-body"></tbody>
+        </table>
+      </div>
+
+      <button id="reset-btn" onclick="resetForm()">Screen another batch</button>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <span>SRsHire is AI and can make mistakes — double-check results before making hiring decisions.</span>
+  </footer>
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
